@@ -1,0 +1,190 @@
+---
+title: "R Notebook"
+output:
+  word_document: default
+  pdf_document:
+    latex_engine: xelatex
+  html_notebook: default
+always_allow_html: yes
+---
+
+```{r setup, include=FALSE}
+
+# This chunk shows/hides the code in your final report. When echo = TRUE, the code
+# is shown in the report. When echo = FALSE, the code is hidden from the final report.
+# We would like to see your code, so please leave the setting as is during the course.
+# This chunk will not show up in your reports, so you can safely ignore its existence.
+
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+
+The following is your first chunk to start with. Remember, you can add chunks using the menu
+above (Insert -> R) or using the keyboard shortcut Ctrl+Alt+I. A good practice is to use
+different code chunks to answer different questions. You can delete this comment if you like.
+
+Other useful keyboard shortcuts include Alt- for the assignment operator, and Ctrl+Shift+M
+for the pipe operator. You can delete these reminders if you don't want them in your report.
+
+
+```{r}
+library("tidyverse")
+library("tidymodels")
+library("plotly")
+library("skimr")
+```
+```{r}
+library("gapminder")
+dfGap <- gapminder
+```
+
+```{r}
+#3a
+skim(dfGap)
+```
+
+```{r}
+#3b
+dfGap %>%
+  filter(year==2007) %>% 
+  arrange(desc(lifeExp))
+# The countries Japan, Hong Kong China, Iceland, Switzerland and Australia have life expectancy over 81.
+```
+
+
+```{r}
+#3c
+newdfGap<-
+  dfGap %>%
+  mutate(totalGDP=pop*gdpPercap) %>% 
+  filter(year==2007) %>% 
+  arrange(desc(totalGDP))
+newdfGap
+
+
+  dfGap %>%
+  mutate(totalGDP=pop*gdpPercap) %>% 
+  filter(year==2007) %>% 
+  select(country,gdpPercap) %>% 
+  arrange(desc(gdpPercap))
+
+
+# The countries United States, China, Japan, India and Germany  are some of countries with highest totalGDP
+# The countries Japan overlap with the countries in 3b
+# The gdpPercapita for such countries is high but the population is low, therefore the totalGDP comes out to be less and therefore less overlap
+```
+
+
+```{r}
+#3d
+newdfGap %>% 
+  group_by(continent) %>% 
+  summarize(median_lifeExp=median(lifeExp), median_totalGDP = median (totalGDP)) %>% 
+  ungroup() %>% 
+  arrange(desc(median_lifeExp))
+
+# The continent Oceania has the highest median life expectancy
+
+```
+
+
+```{r}
+#4a
+newdfGap %>% 
+  ggplot(aes(x=totalGDP,y=lifeExp))+
+  geom_point()
+```
+
+
+```{r}
+newdfGap %>% 
+  filter(totalGDP>1e+12) %>% 
+  ggplot(aes(x=totalGDP,y=lifeExp))+
+  geom_point()
+```
+
+
+```{r}
+
+  newdfGap %>% 
+  filter(totalGDP>1e+12) %>% 
+  ggplot(aes(x=totalGDP,y=lifeExp))+
+  geom_label(aes(label=country))+
+  geom_point()
+  
+```
+
+
+```{r}
+library(ggrepel)
+newdfGap %>% 
+  filter(totalGDP>1e+12) %>% 
+  ggplot(aes(x=totalGDP,y=lifeExp))+
+  geom_label_repel(aes(label=country))+
+  geom_point()
+
+```
+
+
+```{r}
+newdfGap %>% 
+  filter(totalGDP>1e+12) %>% 
+  ggplot(aes(x=totalGDP,y=lifeExp,color=continent))+
+  geom_label_repel(aes(label=country))+
+  geom_point()
+
+
+```
+
+
+```{r}
+#4b
+newdfGap %>% 
+  ggplot(aes(x=gdpPercap,y=lifeExp))+
+  geom_line()+
+  geom_smooth()
+```
+
+
+```{r}
+#4c
+boxPlotsForAll<-
+  dfGap %>% 
+  ggplot(aes(x=continent,y=lifeExp))+
+  geom_boxplot()+
+  ggtitle("Life expectancy across different continents")
+boxPlotsForAll
+```
+
+
+```{r}
+ggplotly(boxPlotsForAll)
+```
+
+
+```{r}
+#4d
+gdpOverTime<-dfGap %>% 
+  group_by(continent,year) %>% 
+  summarize(median_gdpPerCapita=median(gdpPercap)) %>% 
+  ungroup() %>% 
+  ggplot(aes(x=year,y=median_gdpPerCapita,color=continent))+
+  geom_line()
+
+gdpOverTime
+
+```
+```{r}
+dfGap %>% 
+  group_by(continent,year) %>% 
+  summarize(mean_gdpPerCapita=mean(gdpPercap)) %>% 
+  ungroup() %>% 
+  ggplot(aes(x=year,y=mean_gdpPerCapita,color=continent))+
+  geom_line()
+```
+
+
+```{r}
+ggplotly(gdpOverTime)
+```
